@@ -2904,7 +2904,7 @@ var aboutContent =
 	'<center><img src="css/images/icon/logo 60.png"></img></center>' +
 	'<label><font size="5" color="#FAFAFA"><center>Documate</center></font></label>' +
 	'<BR>' +
-	'<label><font size="2" color="#FAFAFA"><center>Ver : 1.25.0207.1</center></font></label>' +
+	'<label><font size="2" color="#FAFAFA"><center>Ver : 1.25.0207.2</center></font></label>' +
 	'<BR>' +
 	'<div id="companyLink" align="center"><font size="2" color="#88F">Official site : www.inswan.com</font></div>' +
 	'<div id="manualLink" align="center"><font size="2" color="#88F">Email : service@inswan.com</font></div>' +
@@ -13290,7 +13290,7 @@ async function selectAudioDefaultDevice(devices) {
 async function initializeDevices() {
     try {
         const hasPermissions = await checkCameraPermission();
-        //const hasPermissions = await checkCameraPermissionEx();
+        await checkAudioPermission();
 
         if (hasPermissions) {
             PreviousDevices = await makeDeviceList();
@@ -13328,25 +13328,34 @@ async function initializeDevices() {
 
 async function checkCameraPermission() {
     try {
-        // 嘗試請求攝影機權限
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
         console.log("Camera permission granted.");
-
-        // 停止攝影機流
         stream.getTracks().forEach(track => track.stop());
-
-        const stream2 = await navigator.mediaDevices.getUserMedia({ audio: true });
-        console.log("Audio permission granted.");
-
-        // 停止攝影機流
-        stream2.getTracks().forEach(track => track.stop());
-
         return true;
     } catch (error) {
         if (error.name === "NotAllowedError") {
             console.warn("Camera permission denied.");
         } else if (error.name === "NotFoundError") {
             console.warn("No camera found on the device.");
+        } else {
+            console.error("An error occurred:", error);
+        }
+
+        return false;
+    }
+}
+
+async function checkAudioPermission() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        console.log("Audio permission granted.");
+        stream.getTracks().forEach(track => track.stop());
+        return true;
+    } catch (error) {
+        if (error.name === "NotAllowedError") {
+            console.warn("Audio permission denied.");
+        } else if (error.name === "NotFoundError") {
+            console.warn("No Audio found on the device.");
         } else {
             console.error("An error occurred:", error);
         }
